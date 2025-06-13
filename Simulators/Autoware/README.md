@@ -529,8 +529,8 @@ It is important to have stable internet connection before running the following 
 colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 # there would be at least 385 packages to build, including simpulators.repos
 ```
-
-# Running test scenarios modules
+# Running Test Scenarios
+## Running test scenarios modules
 if you see the error ` ...your system is not enough powerfull to run simulation at specified frame rate ... `
 , lowering frame rate (from 30.0 to about 10.0) and incrising initialize_duration (from 30 to about 100)
 will help to run simulations.
@@ -551,9 +551,117 @@ initialize_duration:=100
 # https://github.com/tier4/scenario_simulator_v2/blob/master/docs/user_guide/QuickStart.md
 # https://autowarefoundation.github.io/autoware-documentation/main/tutorials/scenario-simulation/planning-simulation/scenario-test-simulation/
 ```
-# Running random test scenarios
+## Running random test scenarios
 ```bash
 # TODO: add instructions for executing and developing random test scenarios
 # https://github.com/tier4/scenario_simulator_v2/blob/master/docs/user_guide/random_test_runner/QuickStart.md```
 # https://autowarefoundation.github.io/autoware-documentation/main/tutorials/scenario-simulation/planning-simulation/random-test-simulation/
+```
+## Running tests using cpp_mock_test runner 
+
+## Design and develop Scenarios
+```bash
+# TODO:add step by step instructions to design scenarios using scenario_simulator_v2
+# https://tier4.github.io/scenario_simulator_v2-docs/
+```
+
+# Evalution
+## Evalution using Autoware Debug Tools
+
+https://github.com/autowarefoundation/autoware_tools/tree/main/common/autoware_debug_tools
+
+### 1.Install and Build from source
+```bash
+git clone https://github.com/autowarefoundation/autoware_tools.git ~/autoware_tools/src/autoware_tools
+```
+#### Solve a bug
+    It seems they forget to add `__init__.py` to  system_performance_plotter module under autoware_debug_tools package
+
+#### Build the package
+```bash
+cd autoware_tools
+colcon build --packages-select autoware_debug_tools
+```
+
+```bash
+source ~/autoware_tools/src/autoware_tools/install/setup.bash
+```
+
+### 2. Verify Installation
+#### Check package presence
+```bash
+ros2 pkg list | grep autoware_debug_tools
+```
+It should show something like autoware_debug_tools.
+
+#### Confirm the script exists
+```bash
+ros2 pkg executables autoware_debug_tools
+```
+You should see cpu_usage_plotter, memory_usage_plotter, processing_time_plotter, etc.
+
+### 3. Start Evalution
+
+#### Using System Usage Monitor
+You can run the program by the following command.
+
+ros2 run autoware_debug_tools system_usage_monitor
+
+#### Using System Performance Plotter
+
+before using system perfomacne plotter tools, you should enable and record simulation rsualts as ros bag files
+1. Run scenario and record resualts
+
+First run System_usage_monitor with `--record` option
+```bash
+ros2 run autoware_debug_tools system_usage_monitor --record
+```
+In an other terminal, launch scenario test runner with `record:=true` and output_directory:=path` options:
+```bash
+ros2 launch scenario_test_runner scenario_test_runner.launch.py \
+  architecture_type:=awf/universe/20230906 \
+  record:=true \
+  output_directory:='/home/ali/scenario_output' \
+  scenario:='$(find-pkg-share scenario_test_runner)/scenario/arsdv143.yaml' \
+  sensor_model:=sample_sensor_kit \
+  vehicle_model:=sample_vehicle \
+  global_frame_rate:=10.0 \
+  initialize_duration:=100
+```
+
+2. System Performance Plotter
+Run the following commands according to your purpose.
+```bash
+# plot processing time
+ros2 run autoware_debug_tools processing_time_plotter <bag-path>
+
+# plot CPU usage
+ros2 run autoware_debug_tools cpu_usage_plotter <bag-path>
+
+# plot memory usage
+ros2 run autoware_debug_tools memory_usage_plotter <bag-path>
+```
+There are several options.
+
+    -c:
+        can filter modules in the specific component (e.g. all, planning, system, etc).
+    -n <number>:
+        can pick up top <number> critical modules.
+    -g <text>
+        can filter the modules which include <text>.
+    -y <val>
+        can set the height of the plot to <val>.
+
+Example
+
+```bash
+ros2 run autoware_debug_tools processing_time_plotter ~/scenario_output/scenario_test_runner/arsdv143/arsdv143 -c planning -g behavior_path -y 300 -n 2
+```
+
+```bash
+ros2 run autoware_debug_tools cpu_usage_plotter ~/scenario_output/scenario_test_runner/arsdv143/arsdv143 -c planning -y 300
+```
+
+```bash
+ros2 run autoware_debug_tools memory_usage_plotter ~/scenario_output/scenario_test_runner/arsdv143/arsdv143 -c planning -y 300
 ```
