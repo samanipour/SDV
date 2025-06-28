@@ -651,6 +651,8 @@ There are several options.
         can filter the modules which include <text>.
     -y <val>
         can set the height of the plot to <val>.
+    -s
+        save results as csv file in directory named result where the command has been executed
 
 Example
 
@@ -664,4 +666,8 @@ ros2 run autoware_debug_tools cpu_usage_plotter ~/scenario_output/scenario_test_
 
 ```bash
 ros2 run autoware_debug_tools memory_usage_plotter ~/scenario_output/scenario_test_runner/arsdv143/arsdv143 -c planning -y 300
+```
+
+```bash
+ros2 run autoware_debug_tools processing_time_plotter ~/scenario_output_low_no_col/scenario_test_runner/arsdv143/arsdv143 -c planning -y 300 -n 1 -s
 ```
